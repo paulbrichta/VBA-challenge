@@ -1,0 +1,137 @@
+Sub Stocks()
+    For Each ws In Worksheets
+        'defines the variables relating to stocks
+        Dim ticker_symbol As String
+        Dim opening_price As Double
+        Dim closing_price As Double
+        Dim yearly_change As Double
+        Dim percentage_change As Double
+        Dim total_stock_volume As Double
+        
+        'BONUS variables
+        Dim greatest_increase_ticker As String
+        Dim greatest_percent_increase As Double
+        greatest_percent_increase = 0
+        
+        Dim greatest_decrese_ticker As String
+        Dim greatest_percent_decrease As Double
+        greatest_percent_decrease = 0
+        
+        Dim greatest_volume_ticker As String
+        Dim greatest_total_volume As Double
+        greatest_total_volume = 0
+        
+        'defines the variables relating to rows to get proper display output
+        Dim row As Double
+        Dim last_row As Double
+        Dim display_row As Double
+        
+        'displays the headers
+        ws.Cells.Range("I1").Value = "Ticker"
+        ws.Columns("I").AutoFit
+        ws.Cells.Range("J1").Value = "Yearly Change"
+        ws.Columns("J").AutoFit
+        ws.Cells.Range("K1").Value = "Percentage Change"
+        ws.Columns("K").AutoFit
+        ws.Cells.Range("L1").Value = "Total Stock Volume"
+        ws.Columns("L").AutoFit
+        
+        'BONUS display
+        ws.Cells.Range("O1").Value = "Ticker"
+        ws.Cells.Range("P1").Value = "Value"
+        ws.Cells.Range("N2").Value = "Greatest % Increase"
+        ws.Cells.Range("N3").Value = "Greatest % Decrease"
+        ws.Cells.Range("N4").Value = "Greatest Total Volume"
+        ws.Columns("N").AutoFit
+        
+        'determines the last row
+        last_row = ws.Cells(Rows.Count, "A").End(xlUp).row
+        
+        'begins the display of output on row 2
+        display_row = 2
+        
+        'sets total stock volume equal for the first ticker
+        total_stock_volume = ws.Cells(2, "G").Value
+        
+        'sets the opening price for the first ticker
+        opening_price = ws.Cells(2, "C").Value
+        
+        'goes through all the rows of the worksheet
+        For row = 2 To last_row
+            
+            'checks to see if the current row ticker symbol matches the next row and calculates total stock volume
+            If ws.Cells(row, "A").Value = ws.Cells(row + 1, "A").Value Then
+                total_stock_volume = total_stock_volume + ws.Cells(row + 1, "G").Value
+            
+            Else
+                'gets the ticker symbol and displays it in column I on the current display row
+                ticker_symbol = ws.Cells(row, "A").Value
+                ws.Cells(display_row, "I").Value = ticker_symbol
+                
+                'gets the closing price and displays it in column J on the current display row
+                closing_price = ws.Cells(row, "F").Value
+                yearly_change = closing_price - opening_price
+                ws.Cells(display_row, "J").Value = yearly_change
+                
+                'gets the percentage change and displays it in column K on the current display row
+                percentage_change = (yearly_change / opening_price) * 100
+                percentage_change = Round(percentage_change, 2)
+                ws.Cells(display_row, "K").Value = percentage_change & "%"
+                
+                'conditional formatting that highlights positive change in green and negative change in red
+                If percentage_change < 0 Then
+                    ws.Cells(display_row, "K").Interior.ColorIndex = 3
+                ElseIf percentage_change > 0 Then
+                    ws.Cells(display_row, "K").Interior.ColorIndex = 4
+                End If
+                
+                'displays total stock volume
+                ws.Cells(display_row, "L").Value = total_stock_volume
+                
+                'moves down one row to display the next ticker symbol and information
+                display_row = display_row + 1
+                
+                'determines greatest percent increase
+                If percentage_change > greatest_percent_increase Then
+                    greatest_percent_increase = percentage_change
+                    greatest_increase_ticker = ws.Cells(row, "A").Value
+                End If
+                
+                'determines greatest percent decrease
+                If percentage_change < greatest_percent_decrease Then
+                    greatest_percent_decrease = percentage_change
+                    greatest_decrease_ticker = ws.Cells(row, "A").Value
+                End If
+                
+                'determines greatest total volume
+                If total_stock_volume > greatest_total_volume Then
+                    greatest_total_volume = total_stock_volume
+                    greatest_volume_ticker = ws.Cells(row, "A").Value
+                End If
+                
+                'sets total stock volume of the next ticker symbol to the first day volume
+                total_stock_volume = ws.Cells(row + 1, "G").Value
+                
+                'sets opening price of the next ticker symbol to the first day price
+                opening_price = ws.Cells(row + 1, "C").Value
+                
+            End If
+        
+        Next row
+        
+        'BONUS display
+        ws.Range("O2").Value = greatest_increase_ticker
+        ws.Range("O3").Value = greatest_decrease_ticker
+        ws.Range("O4").Value = greatest_volume_ticker
+        ws.Columns("O").AutoFit
+        
+        ws.Range("P2").Value = Round(greatest_percent_increase, 2) & "%"
+        ws.Range("P3").Value = Round(greatest_percent_decrease, 2) & "%"
+        ws.Range("P4").Value = greatest_total_volume
+        ws.Columns("P").AutoFit
+        
+    Next ws
+    
+    MsgBox ("All done")
+    
+End Sub
